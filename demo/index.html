@@ -1,0 +1,38 @@
+<html>
+	<head>
+		<title>EcgJs - Demo</title>
+		<!-- Load plotly.js into the DOM -->
+		<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	</head>
+
+	<body>
+		<div id="ecg"><!-- Plotly chart will be drawn inside this DIV --></div>
+
+		<div class="player">
+			<button id="toggle-full">TOGGLE FULL GRAPH</button>
+			<button id="play">PLAY</button>
+			<button id="pause">PAUSE</button>
+			<button id="reset">RESET</button>
+			<button id="clear-notes">CLEAR NOTES</button>
+			<button class="speed-change" data-speed="1">1X</button>
+			<button class="speed-change" data-speed="2">2X</button>
+			<button class="speed-change" data-speed="5">5X</button>
+			<button class="speed-change" data-speed="10">10X</button>
+		</div>
+		<br />
+
+		<div class="speed">
+			<p>Current speed: <span id="speed">1</span>x</p>
+		</div>
+
+		<script src="./../dist/ecg.min.js"></script>
+
+		<script
+			src="https://code.jquery.com/jquery-3.4.1.min.js"
+			integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+			crossorigin="anonymous"
+		></script>
+		<script src="./js/data.js"></script>
+		<script src="./js/script.js"></script>
+	</body>
+</html>
