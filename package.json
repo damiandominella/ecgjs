@@ -1,0 +1,29 @@
+{
+	"name": "ecgjs",
+	"version": "1.0.0",
+	"description": "A simple js library to create ECG Graphs",
+	"main": "dist/index.js",
+	"scripts": {
+		"build": "tsc"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/damiandominella/ecgjs.git"
+	},
+	"keywords": [
+		"ECG",
+		"ecgjs"
+	],
+	"author": "Damian Dominella",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/damiandominella/ecgjs/issues"
+	},
+	"homepage": "https://github.com/damiandominella/ecgjs#readme",
+	"devDependencies": {
+		"@types/jest": "^25.1.4",
+		"jest": "^25.2.3",
+		"ts-jest": "^25.2.1",
+		"typescript": "^3.8.3"
+	}
+}
