@@ -2,10 +2,20 @@ let ecgjs = EcgJs.init("ecg", {
 	plotly: Plotly
 });
 
-ecgjs.addData({
+ecgjs.setData({
 	x: ECG.x,
 	y: ECG.y
 });
+
+// let index = 0;
+// let t = setInterval(() => {
+// 	ecgjs.addData({
+// 		x: ECG.x.slice(index, index + 10),
+// 		y: ECG.y.slice(index, index + 10)
+// 	});
+// 	index += 10;
+// }, 25);
+// clearInterval(t);
 
 $("#play").on("click", function() {
 	ecgjs.play();

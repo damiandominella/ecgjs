@@ -248,13 +248,20 @@ var EcgJsHandler = /** @class */ (function () {
      * @param data
      */
     EcgJsHandler.prototype.addData = function (data) {
-        console.log("[ecgjs] ADD_DATA");
+        console.log("[ecgjs] ADD_DATA", data);
         this.data.x = this.data.x.concat(data.x);
         this.data.y = this.data.y.concat(data.y);
         this.$plotly.extendTraces(this.elementId, {
             x: [data.x],
             y: [data.y]
         }, [0]);
+        var last = this.data.x[this.data.x.length - 1];
+        if (last > this.X_MAX) {
+            var x_start = last - this.X_MAX;
+            var x_end = x_start + this.X_MAX;
+            this.xRange = [x_start, x_end];
+            this.updateRange();
+        }
     };
     /**
      * Plays the ECG Graph.
@@ -309,6 +316,67 @@ var EcgJsHandler = /** @class */ (function () {
             "xaxis.range": this.xRange,
             "yaxis.range": this.yRange
         });
+    };
+    // -----------------------------------------------------------------
+    //                     l a y o u t
+    // -----------------------------------------------------------------
+    /**
+     * Hides x axis grid lines.
+     */
+    EcgJsHandler.prototype.hideXGrid = function () {
+        this.relayout({
+            "xaxis.showgrid": false
+        });
+    };
+    /**
+     * Shows x axis grid lines.
+     */
+    EcgJsHandler.prototype.showXGrid = function () {
+        this.relayout({
+            "xaxis.showgrid": true
+        });
+    };
+    /**
+     * Hides y axis grid lines.
+     */
+    EcgJsHandler.prototype.hideYGrid = function () {
+        this.relayout({
+            "yaxis.showgrid": false
+        });
+    };
+    /**
+     * Shows y axis grid lines.
+     */
+    EcgJsHandler.prototype.showYGrid = function () {
+        this.relayout({
+            "yaxis.showgrid": true
+        });
+    };
+    /**
+     * Hides grid lines.
+     */
+    EcgJsHandler.prototype.hideGrid = function () {
+        this.relayout({
+            "xaxis.showgrid": false,
+            "yaxis.showgrid": false
+        });
+    };
+    /**
+     * Shows grid lines.
+     */
+    EcgJsHandler.prototype.showGrid = function () {
+        this.relayout({
+            "xaxis.showgrid": true,
+            "yaxis.showgrid": true
+        });
+    };
+    /**
+     * Relayouts the graph.
+     *
+     * @param layout
+     */
+    EcgJsHandler.prototype.relayout = function (layout) {
+        this.$plotly.relayout(this.elementId, layout);
     };
     // -----------------------------------------------------------------
     //                     p r i v a t e

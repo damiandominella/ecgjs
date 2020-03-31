@@ -332,7 +332,7 @@ class EcgJsHandler {
 	 * @param data
 	 */
 	public addData(data: { x: any[]; y: any[] }): void {
-		console.log("[ecgjs] ADD_DATA");
+		console.log("[ecgjs] ADD_DATA", data);
 
 		this.data.x = this.data.x.concat(data.x);
 		this.data.y = this.data.y.concat(data.y);
@@ -345,6 +345,16 @@ class EcgJsHandler {
 			},
 			[0]
 		);
+
+		let last = this.data.x[this.data.x.length - 1];
+
+		if (last > this.X_MAX) {
+			var x_start = last - this.X_MAX;
+			var x_end = x_start + this.X_MAX;
+
+			this.xRange = [x_start, x_end];
+			this.updateRange();
+		}
 	}
 
 	/**
@@ -406,6 +416,75 @@ class EcgJsHandler {
 			"xaxis.range": this.xRange,
 			"yaxis.range": this.yRange
 		});
+	}
+
+	// -----------------------------------------------------------------
+	//                     l a y o u t
+	// -----------------------------------------------------------------
+
+	/**
+	 * Hides x axis grid lines.
+	 */
+	public hideXGrid(): void {
+		this.relayout({
+			"xaxis.showgrid": false
+		});
+	}
+
+	/**
+	 * Shows x axis grid lines.
+	 */
+	public showXGrid(): void {
+		this.relayout({
+			"xaxis.showgrid": true
+		});
+	}
+
+	/**
+	 * Hides y axis grid lines.
+	 */
+	public hideYGrid(): void {
+		this.relayout({
+			"yaxis.showgrid": false
+		});
+	}
+
+	/**
+	 * Shows y axis grid lines.
+	 */
+	public showYGrid(): void {
+		this.relayout({
+			"yaxis.showgrid": true
+		});
+	}
+
+	/**
+	 * Hides grid lines.
+	 */
+	public hideGrid(): void {
+		this.relayout({
+			"xaxis.showgrid": false,
+			"yaxis.showgrid": false
+		});
+	}
+
+	/**
+	 * Shows grid lines.
+	 */
+	public showGrid(): void {
+		this.relayout({
+			"xaxis.showgrid": true,
+			"yaxis.showgrid": true
+		});
+	}
+
+	/**
+	 * Relayouts the graph.
+	 *
+	 * @param layout
+	 */
+	public relayout(layout: any): void {
+		this.$plotly.relayout(this.elementId, layout);
 	}
 
 	// -----------------------------------------------------------------
