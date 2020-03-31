@@ -30,7 +30,7 @@ var EcgJsHandler = /** @class */ (function () {
          * xaxis range
          */
         this.X_MIN = 0;
-        this.X_MAX = 3000;
+        this.X_MAX = 4000;
         /**
          * yaxis range
          */
@@ -39,13 +39,21 @@ var EcgJsHandler = /** @class */ (function () {
         console.log("[ecgjs] INIT");
         this.$plotly = plotly;
         this.elementId = elementId;
-        this.data = data;
-        this.fullGraph = {
-            x: this.data.x,
-            y: this.data.y,
-            name: "Full ECG",
-            mode: "lines"
-        };
+        this.element = document.getElementById(elementId);
+        if (!data) {
+            this.data = {
+                x: [],
+                y: []
+            };
+        }
+        else {
+            if (!data.x) {
+                this.data.x = [];
+            }
+            if (!data.y) {
+                this.data.y = [];
+            }
+        }
         this.setDefaults();
         this.config = __assign(__assign({}, this.config), config);
         this.layout = __assign(__assign({}, this.layout), layout);
@@ -65,10 +73,10 @@ var EcgJsHandler = /** @class */ (function () {
         console.log("[ecgjs] PLOT");
         this.$plotly.newPlot(this.elementId, [
             {
-                x: [],
-                y: [],
-                name: "EcgJs",
-                mode: "lines"
+                x: this.data.x,
+                y: this.data.y,
+                name: "Ecg",
+                mode: "scatter"
             }
         ], this.layout, this.config);
     };
@@ -77,15 +85,10 @@ var EcgJsHandler = /** @class */ (function () {
      */
     EcgJsHandler.prototype.reset = function () {
         console.log("[ecgjs] RESET");
-        this.setDefaults();
-        this.hideFull();
         this.pause();
-        var el = document.getElementById(this.elementId);
-        while (el.data.length > 0) {
-            this.$plotly.deleteTraces(this.elementId, [0]);
-        }
+        this.setDefaults();
+        this.$plotly.purge(this.elementId);
         this.index = 0;
-        this.clearNotes();
         // Reinit void trace
         this.plot();
     };
@@ -122,6 +125,137 @@ var EcgJsHandler = /** @class */ (function () {
         this.annotations.push(note);
         this.$plotly.relayout(this.elementId, { annotations: this.annotations });
     };
+    // public play(): void {
+    // 	if (!this.isPlaying) {
+    // 		console.log("[ecgjs] PLAY");
+    // 		this.hideFull();
+    // 		this.isPlaying = true;
+    // 		this.interval = setInterval(() => {
+    // 			var xValues = [this.data.x[this.index]];
+    // 			var yValues = [this.data.y[this.index]];
+    // 			for (var i = this.originalSpeed; i < this.speed; i++) {
+    // 				xValues.push(this.data.x[this.index + i]);
+    // 				yValues.push(this.data.y[this.index + i]);
+    // 			}
+    // 			let mustModule: boolean = false;
+    // 			for (let x of xValues) {
+    // 				if (x >= this.X_MAX - 4) {
+    // 					mustModule = true;
+    // 					break;
+    // 				}
+    // 			}
+    // 			let _index: number = -1;
+    // 			if (mustModule) {
+    // 				xValues = xValues.map((val: number) => val % this.X_MAX);
+    // 				_index = xValues.indexOf(0);
+    // 			}
+    // 			console.log(
+    // 				"current traces (" + this.element.data.length + "):",
+    // 				this.element.data
+    // 			);
+    // 			if (_index > -1) {
+    // 				if (_index > 0) {
+    // 					// adding last chunks to current trace
+    // 					console.log("adding last chunks, extend last trace");
+    // 					this.$plotly.extendTraces(
+    // 						this.elementId,
+    // 						{
+    // 							x: [xValues.slice(0, _index - 1)],
+    // 							y: [yValues.slice(0, _index - 1)]
+    // 						},
+    // 						[-1] // -1 = last
+    // 					);
+    // 				}
+    // 				if (this.element.data.length > 1) {
+    // 					// delete old trace
+    // 					console.log("delete trace: 0");
+    // 					this.$plotly.deleteTraces(this.elementId, 0);
+    // 				}
+    // 				// add new trace
+    // 				console.log(
+    // 					"add new trace with values:",
+    // 					xValues.slice(_index),
+    // 					yValues.slice(_index)
+    // 				);
+    // 				this.$plotly.addTraces(this.elementId, [
+    // 					{
+    // 						x: xValues.slice(_index),
+    // 						y: yValues.slice(_index),
+    // 						mode: "lines"
+    // 					}
+    // 				]);
+    // 			} else {
+    // 				console.log("extend last trace");
+    // 				this.$plotly.extendTraces(
+    // 					this.elementId,
+    // 					{
+    // 						x: [xValues],
+    // 						y: [yValues]
+    // 					},
+    // 					[-1] // -1 = last
+    // 				);
+    // 			}
+    // 			if (this.element.data.length > 1) {
+    // 				console.log("must update old trace");
+    // 				let new_trace = {
+    // 					x: [this.data.x.slice(this.index % 1000, this.index + 100)],
+    // 					y: [this.data.y.slice(this.index % 1000, this.index + 100)]
+    // 				};
+    // 				// update old trace
+    // 				this.$plotly.update(this.elementId, new_trace, {}, [0]);
+    // 			}
+    // 			if (this.index + this.speed === this.data.x.length - 1) {
+    // 				clearInterval(this.interval);
+    // 			} else {
+    // 				this.index += this.speed;
+    // 			}
+    // 			var mustUpdateRange = false;
+    // 			// if (this.data.x[this.index] > this.X_MAX / 2) {
+    // 			// 	mustUpdateRange = true;
+    // 			// 	var x_start = this.data.x[this.index] - this.X_MAX / 2;
+    // 			// 	var x_end = x_start + this.X_MAX;
+    // 			// 	this.xRange = [x_start, x_end];
+    // 			// }
+    // 			// let median: number = this.yRange[1] - this.yRange[0];
+    // 			// if (this.data.y[this.index] < median) {
+    // 			// 	mustUpdateRange = true;
+    // 			// 	var y_start = this.data.y[this.index] - this.Y_MIN / 2;
+    // 			// 	var y_end = y_start + this.Y_MIN;
+    // 			// 	this.yRange = [y_start, y_end];
+    // 			// }
+    // 			// if (!!mustUpdateRange) {
+    // 			// 	this.updateRange();
+    // 			// }
+    // 		}, 25);
+    // 	}
+    // }
+    /**
+     * Replaces current data.
+     *
+     * @param data
+     */
+    EcgJsHandler.prototype.setData = function (data) {
+        console.log("[ecgjs] SET_DATA");
+        this.data = data;
+        this.$plotly.update(this.elementId, {
+            x: [this.data.x],
+            y: [this.data.y]
+        }, {}, [0]);
+    };
+    /**
+     * Adds data, concat arrays.
+     *
+     * @param data
+     */
+    EcgJsHandler.prototype.addData = function (data) {
+        console.log("[ecgjs] ADD_DATA");
+        this.data.x = this.data.x.concat(data.x);
+        this.data.y = this.data.y.concat(data.y);
+        this.$plotly.extendTraces(this.elementId, {
+            x: [data.x],
+            y: [data.y]
+        }, [0]);
+    };
     /**
      * Plays the ECG Graph.
      */
@@ -129,36 +263,11 @@ var EcgJsHandler = /** @class */ (function () {
         var _this = this;
         if (!this.isPlaying) {
             console.log("[ecgjs] PLAY");
-            this.hideFull();
             this.isPlaying = true;
             this.interval = setInterval(function () {
-                var xValues = [_this.data.x[_this.index]];
-                var yValues = [_this.data.y[_this.index]];
-                for (var i = _this.originalSpeed; i < _this.speed; i++) {
-                    xValues.push(_this.data.x[_this.index + i]);
-                    yValues.push(_this.data.y[_this.index + i]);
-                }
-                _this.$plotly.extendTraces(_this.elementId, {
-                    x: [xValues],
-                    y: [yValues]
-                }, [0]);
-                if (_this.index + _this.speed === _this.data.x.length - 1) {
-                    clearInterval(_this.interval);
-                }
-                else {
-                    _this.index += _this.speed;
-                }
-                var mustUpdateRange = false;
-                if (_this.data.x[_this.index] > _this.X_MAX / 2) {
-                    mustUpdateRange = true;
-                    var x_start = _this.data.x[_this.index] - _this.X_MAX / 2;
-                    var x_end = x_start + _this.X_MAX;
-                    _this.xRange = [x_start, x_end];
-                }
-                if (!!mustUpdateRange) {
-                    _this.updateRange();
-                }
-            }, 10);
+                _this.xRange = _this.xRange.map(function (val) { return val + 10 * _this.speed; });
+                _this.updateRange();
+            }, 25);
         }
     };
     /**
@@ -201,27 +310,6 @@ var EcgJsHandler = /** @class */ (function () {
             "yaxis.range": this.yRange
         });
     };
-    /**
-     * Shows full ECG as a second trace.
-     */
-    EcgJsHandler.prototype.showFull = function () {
-        if (!this.isFullShowing) {
-            console.log("[ecgjs] SHOW_FULL");
-            this.pause();
-            this.isFullShowing = true;
-            this.$plotly.addTraces(this.elementId, this.fullGraph);
-        }
-    };
-    /**
-     * Hides full ECG as a second trace.
-     */
-    EcgJsHandler.prototype.hideFull = function () {
-        if (!!this.isFullShowing) {
-            console.log("[ecgjs] HIDE_FULL");
-            this.isFullShowing = false;
-            this.$plotly.deleteTraces(this.elementId, [1]);
-        }
-    };
     // -----------------------------------------------------------------
     //                     p r i v a t e
     // -----------------------------------------------------------------
@@ -233,7 +321,7 @@ var EcgJsHandler = /** @class */ (function () {
         this.layout = {
             title: "EcgJs",
             height: 500,
-            colorway: ["#000"],
+            colorway: ["#000", "#777"],
             annotations: this.annotations,
             xaxis: {
                 title: "Time (ms)",

@@ -1,8 +1,11 @@
-var ecgjs = EcgJs.init("ecg", {
-	plotly: Plotly,
-	data: ECG
+let ecgjs = EcgJs.init("ecg", {
+	plotly: Plotly
 });
 
+ecgjs.addData({
+	x: ECG.x,
+	y: ECG.y
+});
 
 $("#play").on("click", function() {
 	ecgjs.play();
